@@ -9,6 +9,10 @@ if len(sys.argv) != 6:
     print("It's safe to use dn42.unknownts.tk as your host index if the peer is in the index. You can also use your peer's index if they have one")
     sys.exit(1)
 
+write_out = True
+
+global_delimiter = ":"
+
 end_config = sys.argv[1]#"./test.conf"
 base_config = sys.argv[2]#"./base.conf"
 your_asn = sys.argv[3]#"4242423315"
@@ -16,6 +20,9 @@ host_index = sys.argv[4]#"dn42.unknownts.tk"
 dns_server = sys.argv[5]#"63.227.145.132"
 
 
+def split_destroy(string, split_point, delimiter):
+    arr = string.split(delimiter)
+    return str(arr[1])
 
 def get_txt_record(hostname, dns):
     
@@ -37,7 +44,7 @@ h_index = get_txt_record(host_index, dns_server)
 
 for val in h_index:
     count += 1
-    data = val.to_text().replace("\"", "").split(":")
+    data = val.to_text().replace("\"", "").split(global_delimiter)
     data.insert(0, count)
     #print(data)
     option_total = len(data)
@@ -49,7 +56,7 @@ choice_data = []
 i = 0
 for sub_arr in choice_arr:
     i += 1
-    print(str(i) + " : " + str(sub_arr[2]))
+    print(str(i) + ": " + str(sub_arr[2]))
 
 
 def retr_host():
@@ -76,8 +83,8 @@ for val in choice_data:
         line = subset.replace("\"", "")
         #print(line)
         #print(line.lower())
-        if "dn42v6" in line.lower().split(":"):
-            tmp = line.lower().replace("dn42v6:", "")
+        if "dn42v6" in line.lower().split(global_delimiter):
+            tmp = line.lower().replace("dn42v6"+global_delimiter, "")
             #print(tmp)
             try:
                 print(ipaddress.ip_address(tmp))
@@ -88,8 +95,8 @@ for val in choice_data:
                     v6_flag = True
                 elif v6_flag == True:
                     sys.exit(1)
-        elif "dn42v6_ll" in line.lower().split(":"):
-            tmp = line.lower().replace("dn42v6_ll:", "")
+        elif "dn42v6_ll" in line.lower().split(global_delimiter):
+            tmp = line.lower().replace("dn42v6_ll"+global_delimiter, "")
             #print(tmp)
             try:
                 print(ipaddress.ip_address(tmp))
@@ -102,8 +109,8 @@ for val in choice_data:
                     v6_flag = True
                 elif v6_flag == True:
                     sys.exit(1)
-        elif "dn42v4" in line.lower().split(":"):
-            tmp = line.lower().replace("dn42v4:", "")
+        elif "dn42v4" in line.lower().split(global_delimiter):
+            tmp = line.lower().replace("dn42v4"+global_delimiter, "")
             #print(tmp)
             try:
                 #print(ipaddress.ip_address(tmp))
@@ -111,32 +118,33 @@ for val in choice_data:
             except:
                 #print(tmp)
                 sys.exit(1)
-        elif "asn" in line.lower().split(":"):
-            tmp = line.lower().replace("asn:", "")
+        elif "asn" in line.lower().split(global_delimiter):
+            tmp = line.lower().replace("asn"+global_delimiter, "")
             #print(tmp)
             try:
                 full_host_info['asn'] = tmp
             except:
                 #print(tmp)
                 sys.exit(1)
-        elif "pubkey" in line.lower().split(":"):
-            tmp = line.lower().replace("pubkey:", "")
+        elif "pubkey" in line.lower().split(global_delimiter):
+            #tmp = line.lower().replace("pubkey:", "")
+            tmp  = split_destroy(line, "pubkey"+global_delimiter, global_delimiter)
             #print(tmp)
             try:
                 full_host_info['$$PUBKEY$$'] = tmp
             except:
                 #print(tmp)
                 sys.exit(1)
-        elif "wg_port" in line.lower().split(":"):
-            tmp = line.lower().replace("wg_port:", "")
+        elif "wg_port" in line.lower().split(global_delimiter):
+            tmp = line.lower().replace("wg_port"+global_delimiter, "")
             #print(tmp)
             try:
                 full_host_info['$$WG_PORT$$'] = tmp
             except:
                 #print(tmp)
                 sys.exit(1)
-        elif "clearnet" in line.lower().split(":"):
-            tmp = line.lower().replace("clearnet:", "")
+        elif "clearnet" in line.lower().split(global_delimiter):
+            tmp = line.lower().replace("clearnet"+global_delimiter, "")
             #print(tmp)
             try:
                 full_host_info['$$ENDPOINT$$'] = tmp
@@ -164,9 +172,9 @@ with open(base_config, "r") as b_conf:
         count += 1
 
 print(new_line)
-
-with open(end_config, "a") as e_conf:
-    for line in new_line:
-        e_conf.write(str(line))
+if write_out == True:
+    with open(end_config, "a") as e_conf:
+        for line in new_line:
+            e_conf.write(str(line))
 
 #print(full_host_info)
