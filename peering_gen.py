@@ -11,7 +11,7 @@ if len(sys.argv) != 6:
 
 write_out = True
 
-global_delimiter = ":"
+global_delimiter = "=" #Dont change unless you want to break everything
 
 end_config = sys.argv[1]#"./test.conf"
 base_config = sys.argv[2]#"./base.conf"
