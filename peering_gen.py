@@ -21,7 +21,7 @@ dns_server = sys.argv[5]#"63.227.145.132"
 
 
 def split_destroy(string, split_point, delimiter):
-    arr = string.split(delimiter)
+    arr = str(string).split(delimiter)
     return str(arr[1])
 
 def get_txt_record(hostname, dns):
@@ -78,6 +78,7 @@ def retr_host():
 retr_host()
 full_host_info = {}
 v6_flag = False
+#print(1)
 for val in choice_data:
     for subset in val:
         line = subset.replace("\"", "")
@@ -119,7 +120,8 @@ for val in choice_data:
                 #print(tmp)
                 sys.exit(1)
         elif "asn" in line.lower().split(global_delimiter):
-            tmp = line.lower().replace("asn"+global_delimiter, "")
+            #tmp = line.lower().replace("asn"+global_delimiter, "")
+            tmp  = split_destroy(line, "clearnet", global_delimiter)
             #print(tmp)
             try:
                 full_host_info['asn'] = tmp
@@ -128,7 +130,7 @@ for val in choice_data:
                 sys.exit(1)
         elif "pubkey" in line.lower().split(global_delimiter):
             #tmp = line.lower().replace("pubkey:", "")
-            tmp  = split_destroy(line, "pubkey"+global_delimiter, global_delimiter)
+            tmp  = split_destroy(line, "pubkey", global_delimiter)
             #print(tmp)
             try:
                 full_host_info['$$PUBKEY$$'] = tmp
@@ -136,24 +138,31 @@ for val in choice_data:
                 #print(tmp)
                 sys.exit(1)
         elif "wg_port" in line.lower().split(global_delimiter):
-            tmp = line.lower().replace("wg_port"+global_delimiter, "")
+            #tmp = line.lower().replace("wg_port"+global_delimiter, "")
+            tmp  = split_destroy(line, "clearnet", global_delimiter)
             #print(tmp)
             try:
                 full_host_info['$$WG_PORT$$'] = tmp
             except:
                 #print(tmp)
                 sys.exit(1)
-        elif "clearnet" in line.lower().split(global_delimiter):
-            tmp = line.lower().replace("clearnet"+global_delimiter, "")
+        elif "clearnet" in line.lower().split("="):
+            #tmp = line.lower().replace("clearnet"+global_delimiter, "")
+            tmp  = split_destroy(line, "clearnet", global_delimiter)
             #print(tmp)
+            #print("TEST")
             try:
                 full_host_info['$$ENDPOINT$$'] = tmp
             except:
                 #print(tmp)
                 sys.exit(1)
+        #print(1)
 
-full_host_info["$$ENDPOINT$$:$$WG_PORT$$"] = str(full_host_info["$$ENDPOINT$$"]) + ":" + str(full_host_info["$$WG_PORT$$"])
-
+try:
+    full_host_info["$$ENDPOINT$$:$$WG_PORT$$"] = str(full_host_info["$$ENDPOINT$$"]) + ":" + str(full_host_info["$$WG_PORT$$"])
+except Exception as exp:
+    print(str(exp))
+    sys.exit(10)
 line_count = 0
 with open(base_config, "r") as f:
     for line in f:
